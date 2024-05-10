@@ -1,0 +1,342 @@
+
+The cost-effective System
+     for your trip  
+2. Analysis
+
+(그림1)아이콘
+
+
+[ Revision history ]
+05/10/2024  1.0  Prototype 
+
+
+= Contents =
+
+
+1. Introduction .......................................................................................1
+
+2. Use case analysis .............................................................................2
+
+3. Domain analysis .................................................................................6
+
+4. User Interface prototype .................................................................7
+
+5. Glossary ...........................................................................................11
+
+6. References ........................................................................................11
+
+
+
+1. Introduction
+ 해외에 존재하는 다양한 교통패스 중, 사용자에게 가장 간편하고 효율적인 교통패스를 찾아주는 어플을 만들고자 하였다. 이 문서에서는 시스템의 구성요소와 해당 기능들이 구체적으로 어떤 동작을 하는가에대해 분석하고자 한다. use case, domain, interface의 분석을 진행하며 동시에 간단한 ui prototype을 제작하여 대략적인 기능을 기술한다. 
+
+
+2. Use case analysis
+	
+				[그림 1] use-case diagram
+
+
+1) Use-Case 1. Log in
+
+Summary
+client가 회원인지 아닌지를 구분하며, ID찾기나 비밀번호 찾기를 지원한다. 
+Scope
+The cost-effective System (TCES)
+Level
+User Level
+Author
+
+Last Update
+
+Status
+Analysis
+Primary Actor
+Client
+Preconditions
+client가 회원가입이 되어있는 상태이여야 한다. 가입했을때의 이름과 이메일을 알고있어야한다. 
+Trigger
+어플리케이션을 실행할 때.
+Success Post Condition
+로그인에 성공한다. 직후 다음 화면으로 넘어가며, 모든 기능을 사용할 수 있다.
+Failed Post Condition
+로그인에 실패한다. 다음 화면으로 넘어갈 수 없으며, 5회 이상 실패시 30초간 입력할 수 없다. 이후 모든 기능을 사용할 수 없다.
+Main Success Scenario
+
+Step
+Action
+Start
+client가 어플리케이션을 다운로드 한다.
+1
+client가 어플리케이션을 실행한다.
+2
+client가 로그인을 시도하며, 데이터가 남아있으면 어플리케이션에 정상 접속한다.
+3
+정상접속 후 화면이 이동된다.
+Extension Scenarios
+
+Step
+Brancing Action
+4
+4-1) 입력된 정보가 저장된 데이터와 알맞지 않을 때 
+4-2) 입력된 정보가 유효하지 않을 때
+    오류 메시지를 띄우며 다시 입력하도록 한다.
+    다시 초기화면으로 돌아간다.
+4-3) 5회 이상 실패할시
+    30초의 delay를 주고 입력이 불가하도록 한다.
+4-4) 입력한 이메일이 저장된 데이터에 없을 때
+    회원가입을 하라는 메시지를 출력하고 회원가입 페이지로 이동한다.
+Related Infromation
+
+PerFormance
+<=10 sec
+Frequency
+client가 시도하는 만큼 (최대 15번)
+Concurrency
+None
+Due Date
+
+
+
+2) Use-Case 2. Set Rule
+
+Summary
+client가 출발지, 도착지, 우선순위 등 필요한 정보를 설정한다.
+Scope
+The cost-effective System (TCES)
+Level
+User Level
+Author
+
+Last Update
+
+Status
+Analysis
+Primary Actor
+Client
+Preconditions
+client가 출발지와 도착지를 알고있어야한다. 
+Trigger
+로그인 이후 출발지와 도착지를 입력 후 ‘ok’버튼을 눌렀을 때.
+Success Post Condition
+상세 주소 입력 화면으로 이동한다. 상세 주소가 알맞게 입력되었다면 loading 화면으로 이동한다.
+Failed Post Condition
+상세 주소가 알맞게 입력되지 않아 오류메세지를 출력하며, 다음에 이어지는 모든 기능을 사용할 수 없다.
+Main Success Scenario
+
+Step
+Action
+Start
+client가 로그인한다
+1
+client가 출발지와 도착지를 입력한다.
+2
+주소가 정상적으로 입력되었다면 해당 정보를 manager에게 보낸다
+3
+loading 화면을 출력한다.
+Extension Scenarios
+
+Step
+Brancing Action
+4
+4-1) 입력된 정보가 유효하지 않는 주소일 때 
+    오류 메시지를 띄우며 다시 입력하도록 한다.
+    다시 초기화면으로 돌아간다.
+4-2) 너무 먼 거리를 입력할 때
+    오류 메시지를 출력한다.
+4-4) 군사 요지 등 출력할 수 없는 경우
+    오류 메시지를 출력한다.
+Related Infromation
+
+PerFormance
+<=15 sec
+Frequency
+client가 시도하는 만큼 
+Concurrency
+None
+Due Date
+
+
+
+3) Use-Case 2. Data request
+
+Summary
+google과 naver 등에게 필요한 데이터를 요청한다. 
+Scope
+The cost-effective System (TCES)
+Level
+User Level
+Author
+
+Last Update
+
+Status
+Analysis
+Primary Actor
+Server
+Preconditions
+google과 naver의 길찾기 주소를 알고 있어야한다. 
+Trigger
+출발지와 도착지를 입력 후 ok를 눌렀을 때
+Success Post Condition
+정상적으로 데이터를 요청한다.
+Failed Post Condition
+입력 오류 등의 오류로 error가 발생한다. 
+Main Success Scenario
+
+Step
+Action
+Start
+ok 버튼을 누른다
+1
+출발지와 도착지를 naver과 google에 전송한다.
+2
+전송된 데이터를 기준으로 가장 짧은 거리, 빠른 시간, 적은 환승의 경로를 찾아낸다.
+3
+manager에게 데이터를 전송한다.
+Extension Scenarios
+
+Step
+Brancing Action
+4
+4-1) 입력된 정보가 유효하지 않는 주소일 때 
+    다시 초기화면으로 돌아간다.
+4-2) google과 naver 등에서 출력할 수 없는 정보일 때.
+    오류 메시지를 출력한다.
+Related Infromation
+
+PerFormance
+<=35 sec
+Frequency
+데이터가 제대로 전송 될때까지
+Concurrency
+None
+Due Date
+
+
+4) Use-Case 2. Data analysis
+
+Summary
+google과 naver 등에서 들고온 데이터를 이용하여 가장 적합한 경로를 선택한다.
+Scope
+The cost-effective System (TCES)
+Level
+User Level
+Author
+
+Last Update
+
+Status
+Analysis
+Primary Actor
+Manager
+Preconditions
+google과 naver등에게서 데이터를 정상적으로 받아야한다.
+Trigger
+데이터가 정상적으로 들어왔을 때.
+Success Post Condition
+데이터가 정상적으로 들어와서 데이터가 2개 이상일 때. 
+Failed Post Condition
+데이터가 정상적으로 들어오지 않는다. 
+Main Success Scenario
+
+Step
+Action
+Start
+google과 naver등에게서 데이터를 전송받는다.
+1
+각 리스트를 우선순위에 따라 정렬한다.
+2
+정렬 도중 사용한 교통패스의 숫자를 count 한다.
+3
+client에게 정렬된 리스트 중 상위 3가지를 출력한다. 
+Extension Scenarios
+
+Step
+Brancing Action
+4
+4-1) 데이터가 정상적으로 전송되지 않았을 때 
+    오류 메시지를 띄우며 다시 입력하도록 한다.
+    다시 초기화면으로 돌아간다.
+Related Infromation
+
+PerFormance
+<=20 sec
+Frequency
+client가 시도하는 만큼 
+Concurrency
+None
+Due Date
+
+
+
+
+
+3. Domain analysis
+
+1) Client_Set
+전체적인 client 설정을 포괄하는 클래스.
+출발지와 도착지를 설정할 때 사용하며 경로 도시를 설정한다. 또한 경로 탐색시 우선순위(비용, 환승, 시간)등을 설정한다.
+
+2) Log_Data
+로그인 / 로그아웃을 포괄하여 client의 회원정보를 지니고 있는 클래스.
+ID찾기와 비밀번호 찾기도 포함한다.
+
+3) Google_Asset
+구글 길찾기 / 네이버 길찾기 등 필요한 데이터를 수집하고 요청하는 클래스.
+받아온 데이터는 manager에게 전달한다.
+
+4) Calc_Data
+받아온 데이터들을 정렬한 후 필요한 데이터를 뽑아내는 클래스. 
+우선순위에 맞게 필요한 데이터만을 선별하여 가장 효율적인 경로를 계산한다.
+ 
+5) View
+데이터를 종합하여 client에게 정보를 출력하는 클래스.
+4. User Interface prototype
+
+			[그림 2] 전체 prototype ui
+
+1) [그림 3] log in 화면
+			 
+가장 처음 들어갔을 때 뜨는 화면. ID와 비밀번호를 입력하여 로그인을 시도한다. 하단에는 ‘ID찾기’와 ‘비밀번호 찾기’ 기능이 제공된다. 지정된 ID 혹은 비밀번호가 5회 이상 틀릴시 30초간 재입력을 방지한다. 
+
+1-2) [그림 4] ID 찾기와 비밀번호 찾기
+		
+
+ID의 경우 가입자의 이름, 이메일을 입력할시 해당 이메일로 인증메일을 보내는 형식을 취한다. 
+비밀번호의 경우 가입자의 이름, ID, 이메일 인증메일을 입력시 로그인을 할 수 있도록 한다.
+
+2) [그림 5] 출발지, 도착지 입력과 우선순위 선택
+			
+client로 하여금 출발지와 도착지, 우선순위를 선택하게 한다. 이 때, 우선순위는 세 가지 중 하나만 선택할수 있도록 한다. 
+
+2-1) [그림 6] 출발지, 도착지 입력시 도로번호로 상세 주소 검색
+			
+간편하게 상세주소를 얻기 위해 국토교통부 검색 api를 이용한다. 
+
+3) [그림 7] 결과 고지
+			
+우선순위에 따른 경로를 선택하여 경로를 알려준다. 이 때, 네이버와 구글의 ‘길찾기’기능 주소를 하이퍼링크로 걸어서 언제든 편하게 해당 경로를 검색할 수 있도록 지원한다. 
+
+
+5. Glossary
+
+Term
+Describe
+The cost-effective System
+가성비 있는 시스템이라는 뜻으로 가장 가성비 있게 해외여행 교통패스를 추천하는 이 앱의 이름이다.
+manager
+서버에 데이터를 저장함의 기능과, 각 비용을 계산하는 MANAGER 기능을 통틀어서 말한다. 계산과 전송을 담당한다. 
+Client
+해당 앱을 사용하는 사용자를 뜻한다. 경로를 검색하고 데이터를 받는 대상이다.
+
+
+
+
+6. References
+
+1) prototype ui design
+https://www.figma.com/design/uxdMbyGsxES3UC0jENCNfA/Untitled?node-id=0%3A1&t=abVeSIoGytlkbxKZ-1
+2) 국토교통부 검색 API
+https://www.data.go.kr/data/15058799/openapi.do?recommendDataYn=Y
+3) use-case diagram
+https://app.diagrams.net/
