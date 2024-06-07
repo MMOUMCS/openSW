@@ -1,0 +1,244 @@
+3. Design
+The cost-effective System
+     for your trip  
+
+
+
+[ Revision history ]
+
+Revision date
+Version #
+Description
+Author
+06 07 2024
+0.01
+first released
+
+
+
+
+
+
+= Contents =
+
+
+
+
+1. Introduction ..........................................................................................
+
+2. Class diagram ........................................................................................
+
+3. Sequence diagram ..................................................................................
+
+4. State machine diagram ............................................................................ 
+
+5. Implementation requirements ...................................................................
+
+6. Glossary ....................................................................................................
+
+7. References .................................................................................................
+
+
+
+1. Introduction
+
+ 이 문서는 지난 analysis 문서를 토대로 구체화 된 시스템 사항들을 분석했다. 세세한 분류와 클래스로 나누는 것을 통해 구체화 하였으며 class diagram, sequence diagram, state machine diagram을 토대로 설명을 한다. 이 문서를 통해 구체화 된 프로그램을 구현할 수 있으며, 정의에 대해 구체화 하였음을 확인할 수 있다. 객체간의 상호관계와 변환 될 수 있는 모든 경우의 수를 정의해두었다. 이를 통해 event가 언제, 어떻게 변화하는지 어떤 방식으로 변화하는지 확인 할 수 있다. 
+
+
+
+2. Class diagram
+
+
+
+
+Class Name
+Explane
+Login
+log in을 판별하는 클래스. member는 가입한 회원들의 정보를 저장해놓은 배열, inPutId는 입력된 아이디를, inPutPw는 입력된 비밀번호를 읽어온다. checkTrue로 저장된 정보와 일치하는지 판별한다.
+view
+가장 최적의 결과를 보여주는 client viwer이다.
+calc_Data
+입력받은 값 중 가장 효율적인 대상을 찾아서 보내준다. 이 때 가장 효율적인 대상은 client가 설정한 우선순위에 따라 그 우선순위에서 가장 best인 것을 찾아 설정한다. 
+client_Set
+사용자가 선택한 우선순위를 저장하고 이를 manager에게 전달하는 역할을 하는 함수. 
+Start_End_Data
+출발지, 도착지를 client에게 전달받아서 파일로 저장하고, 이를 전달하는 역할을 한다.
+
+
+Manager
+전달받은 데이터를 받아와서 google_Asset에게 데이터를 입력, 이후 반환받은 값 중 필요한 정보를 도출 후 그 값을 calc_Data에게 전달해줍니다. client_Set에게서 반환받은 값을 view에게 전달합니다.
+client
+login과 가입, 비밀번호 찾기 등의 기능을 포괄합니다. manager에게 받은 정보를 토대로 client에게 알맞은 정보를 제공하고 모든 작업이 끝날시 남은 작업을 정리하는 역할을 합니다. 
+google_Asset
+google api에게 요청하여 필요한 데이터를 불러오는 역할을 합니다. 
+
+
+
+Google_Asset
++input: int // 입력받은 데이터를 전달
++output: int // 반환된 데이터를 전달
+
++inPutData(): bool // 입력받은 데이터가 정상적으로 전달 되었는지 판별
++outPutData(): String // 결과를 전달
+
+
+Calc_Data
++inputTime: int //입력받은 시간 데이터
++inputTrans: int //입력받은 환승 데이터
++inputTax: int //입력받은 비용 데이터
+
++getData(): int // 입력받은 데이터들
++calcBestChoice(): String // 리스트 중 가장 효율적인 데이터 선택
+
+
+LogIn
++member: array // 멤버 리스트 
++inPutId: String // 입력받은 아이디
++inPutPw: String // 입력받은 비밀번호
++checkTrue: bool // 입력된 값이 멤버 리스트와 동일할 때 true를 반환 
++getInputId(): String // id값을 읽어오는 함수
++getInputPw: String // pw값을 읽어오는 함수
++checkTrue_data():bool // 입력된 값과 멤버 리스트와 비교하여 같을시 true를 반환
+
+
+Start_End_Data
++searchStart: String // 출발지 입력
++searchEnd: String // 도착지 입력
+
++ searchData(): FIle // 출발지와 도착지를 입력받고 이를 하나의 File로 저장
+
+
+client
++setTime: int // 시간 우선순위 설정
++setTrans: int // 환승 우선순위 설정
++setTax: int // 비용 우선순위 설정
+
++getData(): int // 우선순위 설정 데이터를 저장
+
+
+view
++bestChoice: String // 가장 효율적인 선택지를 저장 (참조)
+
++viewBestChoice(): String // 효울적인 선택지를 client에게 보여줌
+
+
+manager
++readData: FileReader // 저장해두었던 출발지 / 도착지 데이터를 읽어옴
++bestChoiceTime: int // 가장 좋은 시간 선택지
++bestChoiceTax: int // 가장 좋은 비용 선택지
++bestChocieTrans: int // 가장 좋은 환승 선택지
++goalBestChoice: String // 우선순위를 고려해서 선택지 중 가장 좋은 것을 선택
++outPutData: FileWriter // 선택한 bestChoice값을 file로 저장
+
++readData(Array): // file 읽어오기
++outPutData():Array // 저장한 file 내보내기
++whatBestChoice(Array):String // goalBestChoice를 구하는 함수
+
+
+client
++readBestData: String // 가장 좋은 선택지
++setData: Array // 저장했던 모든 선택지
+
++viewBest(): void // 가장 좋은 선택지를 view로 보여주는 함수
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. Sequence diagram
+
+
+	위 그림은 client가 해당 어플을 실행했을 때 진행되는 과정이다. client가 login을 하게 되면 DB에서 해당 정보와 일치한지를 판별, 이후 로그인이 되면 Client에게 true를 반환한다. client가 출발지, 도착지, 우선순위를 client set에 입력하게 되면 그 데이터를 기반으로 Google Asset(API)에게 정보를 전달 후 반환받은 값을 manager에게 보낸다. 이 값을 토대로 manager은 최적의 값과 우선순위를 고려하여 client에게 가장 효율적인 값을 반환하게 된다. client는 직후 view함수를 통해 결과를 보게된다. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. membership
+
+	회원가입을 누를시 client가 DB에게 중복되는 것은 없는지, 해당 조건을 만족하는지 판별을 위한 함수 Check_Ok를 호출한다. 이후 해당 조건에 만족하면 Data를 저장하는 Save_Data를 호출하고, 저장이 정상적으로 완료되면 Log in을 정상적으로 실행한다.
+
+
+3. Search Data
+
+
+
+	Client가 입력한 출발지/도착지/우선순위를 기준으로 manager을 통해 구글 API에게 필요한 데이터를 불러오도록 한다. 1.Dtat Request는 manager을 통해 다듬어진 데이터가 전달되고, 이를 통해 입력된 데이터를 통해 google에게서 결과를 받아온다. google에게서 받은 결과를 우선순위 순서대로 정렬하고 이를 client에게 전달한다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4. State machine diagram
+
+
+
+	클라이언트가 접속을 시도하면 log in 화면을 보여준다. log in 실패 시 하단의 버튼을 누르면 회원가입 화면을 보여준다. 회원가입 성공시 다시 log in 화면으로 돌아오고, log in 성공시 data를 입력받는 Data Set 화면으로 이동한다. Data set에서 data를 입력시 manager에게 데이터가 전달되고, 이걸 토대로 google에게 전달한다. google은 전달받은 데이터를 통해 경로를 검색해주고, 검색 결과를 file로 반환한다. 반환받은 file을 토대로 우선순위 순으로 정렬하고, 이를 view로 보여준다. 
+
+
+
+
+
+
+
+
+
+
+
+5. Implementation requirements
+
+RAM : 1GB+
+HDD/SDD : 10GByte+
+NETWORK : 연결 필수
+
+OS : Window 7 이상
+Implementation Language : Java
+
+
+
+6. Glossary
+
+Term
+Describe
+The cost-effective System
+가성비 있는 시스템이라는 뜻으로 가장 가성비 있게 해외여행 교통패스를 추천하는 이 앱의 이름이다
+manager
+서버에 데이터를 저장함의 기능과, 각 비용을 계산하는 MANAGER 기능을 통틀어서 말한다. 계산과 전송을 담당한다
+Client 
+해당 앱을 사용하는 사용자를 뜻한다. 경로를 검색하고 데이터를 받는 대상이다.
+
+
+
+
+
+7. References
