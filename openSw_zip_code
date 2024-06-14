@@ -1,0 +1,222 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.HashMap;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+// 메인함수
+public class Main extends JFrame {
+    private JTextField inPutId; // 아이디 입력
+    private JPasswordField inPutPw; // 비밀번호 입력
+    private JTextField searchStart; // 출발지 입력
+    private JTextField searchEnd; // 도착지 입력
+    private JRadioButton setTax; //비용우선
+    private JRadioButton setTrans; //환승우선
+    private JRadioButton setTime; //시간 우선
+    private JButton loginButton; // 로그인 버튼
+    private JButton searchButton; // 검색 버튼
+    private JPanel loginPanel; // 로그인 패널
+    private JPanel mainPanel; // 메인 패널(화면)
+    private CardLayout cardLayout; //둘 중 하나 보여주는 레이아웃
+
+    // 검색을 위한 예시
+    private HashMap<String, String[]> member;
+
+    public Main() {
+        setTitle("로그인");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 600);
+        setLocationRelativeTo(null);
+
+        // 검색 데이터 해시맵
+        member = new HashMap<>();
+        member.put("대구-인천", new String[]{"대구", "인천", "44800", "1", "175", "ktx"});
+        member.put("인천-대구", new String[]{"인천", "대구", "47000", "1", "217", "ktx"});
+        member.put("대구-부산", new String[]{"대구", "부산", "9000", "1", "134", "무궁화"});
+        member.put("부산-대구", new String[]{"부산", "대구", "18600", "2", "68", "ktx"});
+        member.put("서울-부산", new String[]{"서울", "부산", "59800", "1", "156", "ktx"});
+        member.put("서울-대구", new String[]{"서울", "대구", "45000", "1", "125", "ktx"});
+
+        // 카드 레이아웃 설정
+        cardLayout = new CardLayout();
+        setLayout(cardLayout);
+
+        // 로그인 패널 설정
+        loginPanel = new JPanel(new BorderLayout());
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 0, 10, 0);
+
+        // 아이디 텍스트랑 입력 추가
+        JLabel usernameLabel = new JLabel("아이디:");
+        inPutId = new JTextField(20);
+        centerPanel.add(usernameLabel, gbc);
+        centerPanel.add(inPutId, gbc);
+
+        // 비밀번호 텍스트랑 입력 추가
+        JLabel passwordLabel = new JLabel("비밀번호:");
+        inPutPw = new JPasswordField(20);
+        centerPanel.add(passwordLabel, gbc);
+        centerPanel.add(inPutPw, gbc);
+
+        //로그인 버튼과 listener
+        JPanel southPanel = new JPanel();
+        loginButton = new JButton("로그인");
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = inPutId.getText();
+                String password = new String(inPutPw.getPassword());
+
+                // 로그인
+                if (checkTrue_data(username, password)) {
+                    // 로그인 성공시 메인화면으로
+                    showSearchPanel();
+                } else { // 실패시 오류 메세지
+                    JOptionPane.showMessageDialog(Main.this, "로그인 실패. 아이디 또는 비밀번호를 확인해주세요.");
+                }
+            }
+        });
+        southPanel.add(loginButton);
+
+
+        loginPanel.add(centerPanel, BorderLayout.CENTER);
+        loginPanel.add(southPanel, BorderLayout.SOUTH);
+
+        // 메인 화면 설정
+        mainPanel = new JPanel(new BorderLayout());
+        JPanel searchInputPanel = new JPanel(new GridLayout(5, 2, 5, 5));
+
+        // 출발지 입력
+        JLabel departureLabel = new JLabel("출발지:");
+        searchStart = new JTextField(20);
+        searchInputPanel.add(departureLabel);
+        searchInputPanel.add(searchStart);
+
+        // 도착지 입력
+        JLabel destinationLabel = new JLabel("도착지:");
+        searchEnd = new JTextField(20);
+        searchInputPanel.add(destinationLabel);
+        searchInputPanel.add(searchEnd);
+
+        // 우선순위 선택 (라디오 버튼)
+        JLabel priorityLabel = new JLabel("우선순위:");
+        searchInputPanel.add(priorityLabel);
+
+        // 우선순위 원소 세 개
+        setTax = new JRadioButton("비용");
+        setTrans = new JRadioButton("환승");
+        setTime = new JRadioButton("시간");
+
+        // 원소 세 개를 묶어서 하나만 선택할수 있게 함
+        ButtonGroup priorityGroup = new ButtonGroup();
+        priorityGroup.add(setTax); //비용 넣기
+        priorityGroup.add(setTrans); // 환승 넣기
+        priorityGroup.add(setTime); // 시간 넣기
+
+        JPanel priorityPanel = new JPanel(); // 패널 묶기
+        priorityPanel.add(setTax);
+        priorityPanel.add(setTrans);
+        priorityPanel.add(setTime);
+
+        searchInputPanel.add(priorityPanel);
+        searchInputPanel.add(new JLabel());
+
+        // 검색 버튼과 listener
+        searchButton = new JButton("검색");
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String departure = searchStart.getText();
+                String destination = searchEnd.getText();
+                String priority = setData();
+                calcBestChoice(departure, destination, priority);
+            }
+        });
+
+        mainPanel.add(searchInputPanel, BorderLayout.NORTH);
+        mainPanel.add(searchButton, BorderLayout.SOUTH);
+
+        // 프레임에 패널 추가
+        add(loginPanel, "loginPanel");
+        add(mainPanel, "mainPanel");
+
+        // 초기에 로그인 패널을 보여줌
+        cardLayout.show(getContentPane(), "loginPanel");
+
+        setVisible(true);
+    }
+
+    // 검색(메인) 화면
+    private void showSearchPanel() {
+        cardLayout.show(getContentPane(), "mainPanel"); // 기본적으로 메인화면 보게 해줌
+    }
+
+    // 출발지, 도착지, 우선순위에 따라 검색 수행
+    private void calcBestChoice(String departure, String destination, String priority) {
+        String[] selectRoute = null;
+        int selectValue = Integer.MAX_VALUE;
+
+        // 우선순위에 따라 가장 적합한 경로 선택
+        for (String key : member.keySet()) {
+            String[] data = member.get(key);
+            if (data[0].equals(departure) && data[1].equals(destination)) {
+                int value = 0;
+                if (priority.equals("비용")) {
+                    value = Integer.parseInt(data[2]);
+                } else if (priority.equals("환승")) {
+                    value = Integer.parseInt(data[3]);
+                } else if (priority.equals("시간")) {
+                    value = Integer.parseInt(data[4]);
+                }
+                if (value < selectValue) {
+                    selectRoute = data;
+                    selectValue = value;
+                }
+            }
+        }
+
+        // 경로 오류 혹은 다른 오류 발생시 오류 메세지 표시
+        if (selectRoute != null) {
+            String message = "우선순위: " + priority + "\n";
+            message += "시간: " + selectRoute[4] + "분\n";
+            message += "환승: " + selectRoute[3] + "회\n";
+            message += "비용: " + selectRoute[2] + "원\n";
+            message += "탑승: " + selectRoute[5] + "\n";
+            JOptionPane.showMessageDialog(Main.this, message);
+        } else {
+            JOptionPane.showMessageDialog(Main.this, "해당 경로를 찾을 수 없습니다.");
+        }
+    }
+
+    // 선택된 우선순위 가져오는 함수
+    private String setData() {
+        if (setTax.isSelected()) {
+            return "비용";
+        } else if (setTrans.isSelected()) {
+            return "환승";
+        } else if (setTime.isSelected()) {
+            return "시간";
+        } else {
+            return "우선순위를 선택하세요.";
+        }
+    }
+
+    // 로그인 인증 로그인 성공시 true 반환
+    // 기본적으로 id = test / password는 test123으로 지정
+    private boolean checkTrue_data(String username, String password) {
+        boolean checkTrue;
+        checkTrue = username.equals("test") && password.equals("test123");
+        return checkTrue;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new Main();
+            }
+        });
+    }
+}
